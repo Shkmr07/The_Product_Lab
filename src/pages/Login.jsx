@@ -37,7 +37,7 @@ export default function Login() {
   return (
     <div className="h-screen w-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
       <div className="bg-white p-10 rounded-2xl shadow-2xl w-[90%] max-w-md text-center">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Welcome Back 👋</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Welcome Back <span className="inline-block animate-bounce">👋</span></h1>
         <p className="text-gray-500 mb-6">Sign in with your Google account to continue</p>
 
         <button
@@ -48,12 +48,12 @@ export default function Login() {
           {loading ? (
             <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
           ) : (
-            <>
+            <div className="cursor-pointer flex items-center gap-3">
               <FcGoogle size={22} />
               <span className="text-sm font-semibold text-gray-700">
                 Sign in with Google
               </span>
-            </>
+            </div>
           )}
         </button>
       </div>
