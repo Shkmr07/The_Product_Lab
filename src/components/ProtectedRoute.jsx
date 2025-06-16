@@ -1,21 +1,16 @@
-import { auth } from "../utils/firebase";
+// src/components/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import Cookies from "js-cookie"; // npm install js-cookie
 
 export default function ProtectedRoute({ children }) {
-  const [user, setUser] = useState(auth.currentUser);
-  const [loading, setLoading] = useState(true);
+  const user = Cookies.get("user"); // use your token or session key
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
+  if (!user) {
+    return <Navigate to="/" />; // redirect to login
+  }
 
-    return () => unsubscribe();
-  }, []);
 
-  if (loading) return <p>Loading...</p>;
 
-  return user ? children : <Navigate to="/login" />;
+  return children;
 }
+
