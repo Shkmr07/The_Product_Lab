@@ -1,9 +1,26 @@
-import { MapContainer, TileLayer, useMap, Polyline } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  useMap,
+  Polyline,
+  Marker,
+  Popup,
+} from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { CiLogout } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
+
+const defaultIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+  shadowSize: [41, 41],
+});
 
 function ORSRouting({
   pointA,
@@ -20,7 +37,7 @@ function ORSRouting({
 
       const apiKey = import.meta.env.VITE_ORS_KEY;
       const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${pointA.lng},${pointA.lat}&end=${pointB.lng},${pointB.lat}`;
-  
+
       try {
         const response = await fetch(url);
         const data = await response.json();
@@ -34,9 +51,10 @@ function ORSRouting({
         // Get distance in km and duration in minutes
         const summary = data.features[0].properties.summary;
         setDistance((summary.distance / 1000).toFixed(2)); // in km
-        let durationInHours = Math.floor(summary.duration / 60); 
-        let durationInMinutes = Math.floor(summary.duration % 60);
-        setDuration(`${durationInHours}h ${durationInMinutes}m`); // in minutes
+        const totalMinutes = Math.floor(summary.duration / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        setDuration(`${hours}h ${minutes}m`);
 
         map.fitBounds(coords);
       } catch (err) {
@@ -62,13 +80,12 @@ export default function MapPage() {
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
 
   function handleClick() {
     Cookies.remove("user");
     navigate("/");
-  } 
+  }
 
   const handleMapClick = (e) => {
     const latlng = { lat: e.latlng.lat, lng: e.latlng.lng };
@@ -127,7 +144,10 @@ export default function MapPage() {
           <p className="text-sm text-gray-600">{user.email}</p>
         </div>
         <div className="flex items-center gap-6">
-          <CiLogout onClick={handleClick} className="text-2xl font-semibold transition-transform duration-300 ease-in-out hover:scale-105" />
+          <CiLogout
+            onClick={handleClick}
+            className="text-2xl hover:text-red-600  font-semibold transition-transform duration-300 ease-in-out hover:scale-105"
+          />
           <img
             src={user.photoURL}
             alt="Profile"
@@ -169,6 +189,18 @@ export default function MapPage() {
         whenCreated={(mapInstance) => mapInstance.on("click", handleMapClick)}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+        {pointA && (
+          <Marker position={pointA} icon={defaultIcon}>
+            <Popup>Start Point</Popup>
+          </Marker>
+        )}
+        {pointB && (
+          <Marker position={pointB} icon={defaultIcon}>
+            <Popup>End Point</Popup>
+          </Marker>
+        )}
+
         {pointA && pointB && (
           <ORSRouting
             pointA={pointA}
@@ -189,7 +221,6 @@ export default function MapPage() {
           <strong>{duration}</strong>
         </div>
       )}
-
     </div>
   );
 }
