@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { CiLogout } from "react-icons/ci";
+import { useNavigate } from "react-router-dom";
 
 function ORSRouting({
   pointA,
@@ -33,7 +34,9 @@ function ORSRouting({
         // Get distance in km and duration in minutes
         const summary = data.features[0].properties.summary;
         setDistance((summary.distance / 1000).toFixed(2)); // in km
-        setDuration((summary.duration / 60).toFixed(2)); // in minutes
+        let durationInHours = Math.floor(summary.duration / 60); 
+        let durationInMinutes = Math.floor(summary.duration % 60);
+        setDuration(`${durationInHours}h ${durationInMinutes}m`); // in minutes
 
         map.fitBounds(coords);
       } catch (err) {
@@ -58,11 +61,13 @@ export default function MapPage() {
   const [toInput, setToInput] = useState("");
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate()
 
 
   function handleClick() {
     Cookies.remove("user");
-    window.location.href = "/";
+    navigate("/");
   } 
 
   const handleMapClick = (e) => {
@@ -78,6 +83,7 @@ export default function MapPage() {
 
   const getCoordinates = async (place) => {
     try {
+      setLoading(true);
       const url = `https://nominatim.openstreetmap.org/search?q=${place}&format=json&limit=1`;
       const proxyURL = `https://api.allorigins.win/get?url=${encodeURIComponent(
         url
@@ -97,6 +103,8 @@ export default function MapPage() {
       console.error("Fetch error:", error);
       alert("Failed to fetch coordinates.");
       return null;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,7 +133,6 @@ export default function MapPage() {
             alt="Profile"
             className="h-10 w-10 rounded-full"
           />
-          {console.log("User image:", user.photoURL)}
         </div>
       </div>
 
@@ -147,9 +154,9 @@ export default function MapPage() {
         />
         <button
           onClick={handleSearch}
-          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 cursor-pointer py-1 rounded hover:bg-blue-700"
         >
-          Find Route
+          {loading ? "Searching..." : "Find Route"}
         </button>
       </div>
 
@@ -179,10 +186,10 @@ export default function MapPage() {
       {distance && duration && (
         <div className="absolute top-1/2 left-1/2 z-50 transform -translate-x-1/2 bg-white p-2 rounded shadow text-sm text-gray-800">
           Distance: <strong>{distance} km</strong>, Duration:{" "}
-          <strong>{duration} mins</strong>
+          <strong>{duration}</strong>
         </div>
       )}
-      {console.log("distance:", distance, "duration:", duration)}
+
     </div>
   );
 }

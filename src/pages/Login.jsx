@@ -22,7 +22,7 @@ export default function Login() {
           email: result.user.email,
           photoURL: result.user.photoURL,
         }),
-        { expires: 7 }
+        { expires: 1 }
       );
 
 
