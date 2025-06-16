@@ -20,7 +20,7 @@ function ORSRouting({
 
       const apiKey = import.meta.env.VITE_ORS_KEY;
       const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${pointA.lng},${pointA.lat}&end=${pointB.lng},${pointB.lat}`;
-      console.log("Fetching route from:", apiKey);
+  
       try {
         const response = await fetch(url);
         const data = await response.json();
