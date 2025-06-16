@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, useMap, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { CiLogout } from "react-icons/ci";
 
 function ORSRouting({
   pointA,
@@ -58,6 +59,12 @@ export default function MapPage() {
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
 
+
+  function handleClick() {
+    Cookies.remove("user");
+    window.location.href = "/";
+  } 
+
   const handleMapClick = (e) => {
     const latlng = { lat: e.latlng.lat, lng: e.latlng.lng };
     if (!pointA) setPointA(latlng);
@@ -111,11 +118,15 @@ export default function MapPage() {
           <p className="font-bold text-lg">Hello, {user.name}</p>
           <p className="text-sm text-gray-600">{user.email}</p>
         </div>
-        <img
-          src={user.photoURL}
-          alt="Profile"
-          className="h-10 w-10 rounded-full"
-        />
+        <div className="flex items-center gap-6">
+          <CiLogout onClick={handleClick} className="text-2xl font-semibold transition-transform duration-300 ease-in-out hover:scale-105" />
+          <img
+            src={user.photoURL}
+            alt="Profile"
+            className="h-10 w-10 rounded-full"
+          />
+          {console.log("User image:", user.photoURL)}
+        </div>
       </div>
 
       {/* From & To Inputs */}
